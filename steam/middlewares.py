@@ -1,13 +1,25 @@
 import logging
 import os
 import re
-from w3lib.url import url_query_cleaner
+from w3lib.url import url_query_cleaner, canonicalize_url
 
 from scrapy import Request
 from scrapy.downloadermiddlewares.redirect import RedirectMiddleware
 from scrapy.dupefilters import RFPDupeFilter
 from scrapy.extensions.httpcache import FilesystemCacheStorage
-from scrapy.utils.request import request_fingerprint
+from scrapy.utils.python import to_bytes
+import hashlib
+
+def request_fingerprint(request):
+    """
+    Implementation of request_fingerprint for Scrapy >= 2.10 compatibility
+    """
+    fp = hashlib.sha1()
+    fp.update(to_bytes(request.method))
+    url = url_query_cleaner(request.url, ['snr'], remove=True)
+    fp.update(to_bytes(canonicalize_url(url)))
+    fp.update(request.body or b'')
+    return fp.hexdigest()
 
 logger = logging.getLogger(__name__)
 
