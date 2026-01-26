@@ -1,2 +1,5 @@
 *.pyc
 junk/*
+
+# Generated output
+output/
