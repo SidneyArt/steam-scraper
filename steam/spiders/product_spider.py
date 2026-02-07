@@ -97,7 +97,8 @@ class ProductSpider(CrawlSpider):
     """
     name = 'products'
     # 起始 URL：按发行日期降序排列的游戏列表
-    start_urls = ['http://store.steampowered.com/search/?sort_by=Released_DESC']
+    # 添加 &cc=us 参数以强制使用美元结算（避免因 VPN 导致货币不一致）
+    start_urls = ['http://store.steampowered.com/search/?sort_by=Released_DESC&cc=us']
 
     allowed_domains = ['steampowered.com']
 
