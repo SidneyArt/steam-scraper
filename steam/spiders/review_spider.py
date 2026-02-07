@@ -89,7 +89,8 @@ class ReviewSpider(scrapy.Spider):
     name = 'reviews'
     test_urls = [
         # 测试用 URL (Full Metal Furies)
-        'http://steamcommunity.com/app/416600/reviews/?browsefilter=mostrecent&p=1',
+        # 包含所有语言的评论 &filterLanguage=all
+        'http://steamcommunity.com/app/416600/reviews/?browsefilter=mostrecent&p=1&filterLanguage=all',
     ]
 
     def __init__(self, url_file=None, steam_id=None, *args, **kwargs):
@@ -118,7 +119,8 @@ class ReviewSpider(scrapy.Spider):
         if self.steam_id:
             url = (
                 f'http://steamcommunity.com/app/{self.steam_id}/reviews/'
-                '?browsefilter=mostrecent&p=1'
+                # 包含所有语言的评论 &filterLanguage=all
+                '?browsefilter=mostrecent&p=1&filterLanguage=all'
             )
             yield Request(url, callback=self.parse)
         elif self.url_file:
