@@ -3,7 +3,7 @@ import logging
 
 import scrapy
 from scrapy.loader import ItemLoader
-from scrapy.loader.processors import Compose, Join, MapCompose, TakeFirst
+from itemloaders.processors import Compose, Join, MapCompose, TakeFirst
 
 logger = logging.getLogger(__name__)
 

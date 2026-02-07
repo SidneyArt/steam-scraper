@@ -129,7 +129,8 @@ class ProductSpider(CrawlSpider):
         如果指定了 steam_id，则直接请求该游戏页面；否则使用 start_urls 开始遍历。
         """
         if self.steam_id:
-            yield Request(f'http://store.steampowered.com/app/{self.steam_id}/',
+            # 强制使用美元结算，避免因 VPN 导致货币不一致
+            yield Request(f'http://store.steampowered.com/app/{self.steam_id}/?cc=us',
                           callback=self.parse_product)
         else:
             yield from super().start_requests()

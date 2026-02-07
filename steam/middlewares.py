@@ -7,7 +7,7 @@ from scrapy import Request
 from scrapy.downloadermiddlewares.redirect import RedirectMiddleware
 from scrapy.dupefilters import RFPDupeFilter
 from scrapy.extensions.httpcache import FilesystemCacheStorage
-from scrapy.utils.request import request_fingerprint
+from scrapy.utils.request import fingerprint
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class SteamCacheStorage(FilesystemCacheStorage):
     """
     def _get_request_path(self, spider, request):
         request = strip_snr(request)
-        key = request_fingerprint(request)
+        key = fingerprint(request).hex()
         return os.path.join(self.cachedir, spider.name, key[0:2], key)
 
 
@@ -37,9 +37,9 @@ class SteamDupeFilter(RFPDupeFilter):
     自定义去重过滤器。
     在计算指纹前移除 'snr' 参数，防止重复抓取同一页面。
     """
-    def request_fingerprint(self, request):
+    def request_seen(self, request):
         request = strip_snr(request)
-        return super().request_fingerprint(request)
+        return super().request_seen(request)
 
 
 class CircumventAgeCheckMiddleware(RedirectMiddleware):
@@ -47,11 +47,11 @@ class CircumventAgeCheckMiddleware(RedirectMiddleware):
     自动绕过年龄验证的中间件。
     当检测到重定向到年龄验证页面时，自动添加 'mature_content=1' cookie 并重新请求。
     """
-    def _redirect(self, redirected, request, spider, reason):
+    def _redirect(self, redirected, request, reason):
         # 仅当重定向目标包含 'agecheck' 时才介入
         # 其他重定向交给默认中间件处理
         if not re.findall('app/(.*)/agecheck', redirected.url):
-            return super()._redirect(redirected, request, spider, reason)
+            return super()._redirect(redirected, request, reason)
 
         logger.debug(f'Button-type age check triggered for {request.url}.')
 
@@ -59,4 +59,4 @@ class CircumventAgeCheckMiddleware(RedirectMiddleware):
         return Request(url=request.url,
                        cookies={'mature_content': '1'},
                        meta={'dont_cache': True},
-                       callback=spider.parse_product)
+                       callback=request.callback)
